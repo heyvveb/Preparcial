@@ -10,6 +10,13 @@ class pokemon(BaseModel):
     life:int
     atack:int
 
+def attack(atacante:pokemon, atacado:pokemon):
+    atacado.life=atacado.life-atacante.atack
+    return atacado
+
+def lifeshowpokemon(pok:pokemon):
+    return f"{pok.name} queda con: {pok.life}"
+
 p1 = pokemon(id=1, name="Gengar", type="Ghost/Poison", life=60, atack=65)
 p2 = pokemon(id=2, name="Charmander", type="Fire", life=39, atack=52)
 p3 = pokemon(id=3, name="Bulbasaur", type="Grass/Poison", life=45, atack=49)
@@ -84,27 +91,39 @@ def show_pokemon_byID(id:int):
 
 @app.get("/pokemonbattle/{pokemon1}/{pokemon2}")
 def battle(pokemon1:str,pokemon2:str):
-    print("Win the pokemon whit more life, in case of draw win the stronger pokemon")
-
-    pok1=pokemon()
-    pok2=pokemon()
+    print("Lose de pokemon whit 0hp")
+    pok1=None
+    pok2=None
     for pok in pokemons:
         if pok.name.lower()==pokemon1.lower():
-            pok1=pok
+            pok1=pok.copy()
         elif pok.name.lower()==pokemon2.lower():
-            pok2=pok
+            pok2=pok.copy()
     show_pokemon_byID(pok1.id)
     print("\nVS\n")
     show_pokemon_byID(pok2.id)
-    if pok1.life>pok2.life:
+    while pok1.life>0 and pok2.life>0:
+        attack(pok1,pok2)
+        lifeshowpokemon(pok2)
+        if pok2.life>0:
+            attack(pok2,pok1)
+            lifeshowpokemon(pok1)
+    if pok1.life>0:
         return f"Ganador: {pok1.name}"
-    elif pok2.life>pok1.life:
-        return f"Ganador: {pok2.name}"
-    elif pok1.atack>pok2.atack:
-        return f"Ganador: {pok1.name}"
-    elif pok2.atack>pok1.atack:
-        return f"Ganador: {pok2.name}"
-    return "Draw"
-@app.get("/pokemonorderedby")
-def orderedby():
-    return new_pokemon
+    return f"Ganador: {pok2.name}"        
+@app.get("/pokemonorderedby/{option}")
+def orderedby(option:str):
+    if option.lower() == "descendente":
+        return sorted(pokemons, key=lambda x: x.id, reverse=True)
+    if option.lower() == "ascendente":
+        return sorted(pokemons, key=lambda x: x.id)
+    if option.lower() == "id":
+        return sorted(pokemons, key=lambda x: x.id)
+    if option.lower() == "nombre":
+        return sorted(pokemons, key=lambda x: x.name)
+    if option.lower() == "ataque":
+        return sorted(pokemons, key=lambda x: x.atack)
+    if option.lower() == "vida":
+        return sorted(pokemons, key=lambda x: x.life)
+    if option.lower() == "tipo":
+        return sorted(pokemons, key=lambda x: x.type)
