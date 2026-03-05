@@ -91,7 +91,7 @@ def show_pokemon_byID(id:int):
 
 @app.get("/pokemonbattle/{pokemon1}/{pokemon2}")
 def battle(pokemon1:str,pokemon2:str):
-    print("Lose de pokemon whit 0hp")
+
     pok1=None
     pok2=None
     for pok in pokemons:
@@ -99,18 +99,17 @@ def battle(pokemon1:str,pokemon2:str):
             pok1=pok.copy()
         elif pok.name.lower()==pokemon2.lower():
             pok2=pok.copy()
-    show_pokemon_byID(pok1.id)
-    print("\nVS\n")
-    show_pokemon_byID(pok2.id)
+    battle_log = [f"Lose de pokemon whit 0hp", f"{pok1.name} VS {pok2.name}"]
+
     while pok1.life>0 and pok2.life>0:
         attack(pok1,pok2)
-        lifeshowpokemon(pok2)
+        battle_log.append(f"{pok1.name} ataca {pok2.name} \n"+ lifeshowpokemon(pok2)+"\n")
         if pok2.life>0:
             attack(pok2,pok1)
-            lifeshowpokemon(pok1)
+            battle_log.append(f"{pok2.name} ataca {pok1.name} \n"+lifeshowpokemon(pok1)+"\n")
     if pok1.life>0:
-        return f"Ganador: {pok1.name}"
-    return f"Ganador: {pok2.name}"        
+        return f"{battle_log}\n Ganador: {pok1.name}"
+    return f"{battle_log}\n Ganador: {pok2.name}"        
 @app.get("/pokemonorderedby/{option}")
 def orderedby(option:str):
     if option.lower() == "descendente":
